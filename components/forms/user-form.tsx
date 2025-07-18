@@ -1,90 +1,107 @@
 // Reusable user form component with validation
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { User, Mail, Building, MapPin, Phone, Loader2 } from "lucide-react"
-import type { User as UserType } from "@/lib/data-store"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, Mail, Building, MapPin, Phone, Loader2 } from "lucide-react";
+import type { User as UserType } from "@/lib/data-store";
 
 interface UserFormProps {
-  user?: UserType
-  onSubmit: (userData: Partial<UserType>) => Promise<void>
-  onCancel: () => void
-  loading?: boolean
-  title?: string
+  user?: UserType;
+  onSubmit: (userData: Partial<UserType>) => Promise<void>;
+  onCancel: () => void;
+  loading?: boolean;
+  title?: string;
 }
 
-export function UserForm({ user, onSubmit, onCancel, loading = false, title }: UserFormProps) {
+export function UserForm({
+  user,
+  onSubmit,
+  onCancel,
+  loading = false,
+  title,
+}: UserFormProps) {
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     role: user?.role || ("job_seeker" as const),
     company: user?.company || "",
-    status: user?.status || ("active" as const),
+    status: "active",
+    // user?.status || ("active" as const),
     phone: user?.profileData?.phone || "",
     location: user?.profileData?.location || "",
     bio: user?.profileData?.bio || "",
-  })
+  });
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required"
+      newErrors.name = "Name is required";
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format"
+      newErrors.email = "Invalid email format";
     }
 
     if (formData.role === "employer" && !formData.company.trim()) {
-      newErrors.company = "Company is required for employers"
+      newErrors.company = "Company is required for employers";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
     const userData: Partial<UserType> = {
       name: formData.name,
       email: formData.email,
       role: formData.role,
-      status: formData.status,
       ...(formData.role === "employer" && { company: formData.company }),
       profileData: {
         phone: formData.phone,
         location: formData.location,
         bio: formData.bio,
+        skills: [],
+        experience: "",
+        education: "",
       },
-    }
+    };
 
     try {
-      await onSubmit(userData)
+      await onSubmit(userData);
     } catch (error) {
-      console.error("Form submission error:", error)
+      console.error("Form submission error:", error);
     }
-  }
+  };
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>{title || (user ? "Edit User" : "Create New User")}</CardTitle>
+        <CardTitle>
+          {title || (user ? "Edit User" : "Create New User")}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -97,12 +114,16 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, name: e.target.value }))
+                  }
                   className="pl-10"
                   placeholder="Enter full name"
                 />
               </div>
-              {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+              {errors.name && (
+                <p className="text-sm text-red-600">{errors.name}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -113,20 +134,26 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                  }
                   className="pl-10"
                   placeholder="Enter email address"
                   disabled={!!user} // Don't allow email changes for existing users
                 />
               </div>
-              {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-sm text-red-600">{errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="role">Role *</Label>
               <Select
                 value={formData.role}
-                onValueChange={(value: any) => setFormData((prev) => ({ ...prev, role: value }))}
+                onValueChange={(value: any) =>
+                  setFormData((prev) => ({ ...prev, role: value }))
+                }
                 disabled={!!user} // Don't allow role changes for existing users
               >
                 <SelectTrigger>
@@ -144,7 +171,9 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value: any) => setFormData((prev) => ({ ...prev, status: value }))}
+                onValueChange={(value: any) =>
+                  setFormData((prev) => ({ ...prev, status: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
@@ -165,12 +194,19 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
                   <Input
                     id="company"
                     value={formData.company}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        company: e.target.value,
+                      }))
+                    }
                     className="pl-10"
                     placeholder="Enter company name"
                   />
                 </div>
-                {errors.company && <p className="text-sm text-red-600">{errors.company}</p>}
+                {errors.company && (
+                  <p className="text-sm text-red-600">{errors.company}</p>
+                )}
               </div>
             )}
           </div>
@@ -184,7 +220,9 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
                 <Input
                   id="phone"
                   value={formData.phone}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, phone: e.target.value }))
+                  }
                   className="pl-10"
                   placeholder="+1 (555) 123-4567"
                 />
@@ -198,7 +236,12 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
                 <Input
                   id="location"
                   value={formData.location}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, location: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      location: e.target.value,
+                    }))
+                  }
                   className="pl-10"
                   placeholder="City, State"
                 />
@@ -212,7 +255,9 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
             <Textarea
               id="bio"
               value={formData.bio}
-              onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, bio: e.target.value }))
+              }
               placeholder="Tell us about this user..."
               rows={3}
             />
@@ -220,10 +265,20 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
 
           {/* Form Actions */}
           <div className="flex justify-end space-x-4 pt-4">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={loading} className="bg-transparent">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={loading}
+              className="bg-transparent"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="bg-blue-600 hover:bg-blue-700">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -239,5 +294,5 @@ export function UserForm({ user, onSubmit, onCancel, loading = false, title }: U
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

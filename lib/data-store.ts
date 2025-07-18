@@ -1,68 +1,70 @@
 // In-memory data store with CRUD operations
 export interface User {
-  id: string
-  email: string
-  name: string
-  role: "job_seeker" | "employer" | "admin"
-  company?: string
+  id: string;
+  email: string;
+  name: string;
+  role: "job_seeker" | "employer" | "admin";
+  company?: string;
   profileData?: {
-    skills: string[]
-    experience: string
-    education: string
-    location: string
-    resumeUrl?: string
-  }
-  createdAt: string
+    bio?: string;
+    skills: string[];
+    experience: string;
+    education: string;
+    location: string;
+    phone?: string;
+    resumeUrl?: string;
+  };
+  createdAt: string;
 }
 
 export interface JobListing {
-  id: string
-  title: string
-  company: string
-  location: string
-  type: "Full-time" | "Part-time" | "Contract" | "Remote"
-  salary: string
-  description: string
-  requirements: string[]
-  benefits: string[]
-  status: "active" | "paused" | "closed"
-  postedBy: string
-  applicants: number
-  createdAt: string
-  updatedAt: string
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: "Full-time" | "Part-time" | "Contract" | "Remote";
+  salary: string;
+  description: string;
+  requirements: string[];
+  benefits: string[];
+  status: "active" | "paused" | "closed";
+  postedBy: string;
+  applicants: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Application {
-  id: string
-  jobId: string
-  candidateId: string
-  candidateName: string
-  candidateEmail: string
-  resumeUrl: string
-  score: number
-  status: "pending" | "passed" | "failed"
-  appliedAt: string
-  assessmentId?: string
+  id: string;
+  jobId: string;
+  candidateId: string;
+  candidateName: string;
+  candidateEmail: string;
+  resumeUrl: string;
+  score: number;
+  status: "pending" | "passed" | "failed";
+  appliedAt: string;
+  assessmentId?: string;
 }
 
 export interface Assessment {
-  id: string
-  jobId: string
-  title: string
-  description: string
-  timeLimit: number // in minutes
-  passingScore: number
-  questions: Question[]
-  createdAt: string
+  id: string;
+  jobId: string;
+  title: string;
+  description: string;
+  timeLimit: number; // in minutes
+  passingScore: number;
+  questions: Question[];
+  createdAt: string;
 }
 
 export interface Question {
-  id: string
-  type: "multiple_choice" | "coding" | "essay"
-  question: string
-  options?: string[]
-  correctAnswer?: string | number
-  points: number
+  id: string;
+  type: "multiple_choice" | "coding" | "essay";
+  question: string;
+  options?: string[];
+  correctAnswer?: string | number;
+  points: number;
 }
 
 // In-memory storage
@@ -95,7 +97,7 @@ const users: User[] = [
     },
     createdAt: new Date().toISOString(),
   },
-]
+];
 
 const jobs: JobListing[] = [
   {
@@ -105,7 +107,8 @@ const jobs: JobListing[] = [
     location: "San Francisco, CA",
     type: "Full-time",
     salary: "$120,000 - $150,000",
-    description: "We are looking for a senior frontend developer to join our team...",
+    description:
+      "We are looking for a senior frontend developer to join our team...",
     requirements: ["5+ years React experience", "TypeScript", "GraphQL"],
     benefits: ["Health insurance", "401k", "Remote work"],
     status: "active",
@@ -130,7 +133,7 @@ const jobs: JobListing[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
-]
+];
 
 const applications: Application[] = [
   {
@@ -145,7 +148,7 @@ const applications: Application[] = [
     appliedAt: new Date().toISOString(),
     assessmentId: "1",
   },
-]
+];
 
 const assessments: Assessment[] = [
   {
@@ -180,7 +183,7 @@ const assessments: Assessment[] = [
     ],
     createdAt: new Date().toISOString(),
   },
-]
+];
 
 // CRUD operations
 export const dataStore = {
@@ -193,82 +196,90 @@ export const dataStore = {
         ...userData,
         id: Date.now().toString(),
         createdAt: new Date().toISOString(),
-      }
-      users.push(newUser)
-      return newUser
+      };
+      users.push(newUser);
+      return newUser;
     },
     update: (id: string, updates: Partial<User>) => {
-      const index = users.findIndex((u) => u.id === id)
-      if (index === -1) return null
-      users[index] = { ...users[index], ...updates }
-      return users[index]
+      const index = users.findIndex((u) => u.id === id);
+      if (index === -1) return null;
+      users[index] = { ...users[index], ...updates };
+      return users[index];
     },
     delete: (id: string) => {
-      const index = users.findIndex((u) => u.id === id)
-      if (index === -1) return false
-      users.splice(index, 1)
-      return true
+      const index = users.findIndex((u) => u.id === id);
+      if (index === -1) return false;
+      users.splice(index, 1);
+      return true;
     },
   },
   jobs: {
     getAll: () => jobs,
     getById: (id: string) => jobs.find((j) => j.id === id),
-    create: (jobData: Omit<JobListing, "id" | "createdAt" | "updatedAt" | "applicants">) => {
+    create: (
+      jobData: Omit<JobListing, "id" | "createdAt" | "updatedAt" | "applicants">
+    ) => {
       const newJob: JobListing = {
         ...jobData,
         id: Date.now().toString(),
         applicants: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      }
-      jobs.push(newJob)
-      return newJob
+      };
+      jobs.push(newJob);
+      return newJob;
     },
     update: (id: string, updates: Partial<JobListing>) => {
-      const index = jobs.findIndex((j) => j.id === id)
-      if (index === -1) return null
-      jobs[index] = { ...jobs[index], ...updates, updatedAt: new Date().toISOString() }
-      return jobs[index]
+      const index = jobs.findIndex((j) => j.id === id);
+      if (index === -1) return null;
+      jobs[index] = {
+        ...jobs[index],
+        ...updates,
+        updatedAt: new Date().toISOString(),
+      };
+      return jobs[index];
     },
     delete: (id: string) => {
-      const index = jobs.findIndex((j) => j.id === id)
-      if (index === -1) return false
-      jobs.splice(index, 1)
-      return true
+      const index = jobs.findIndex((j) => j.id === id);
+      if (index === -1) return false;
+      jobs.splice(index, 1);
+      return true;
     },
   },
   applications: {
     getAll: () => applications,
     getById: (id: string) => applications.find((a) => a.id === id),
-    getByJobId: (jobId: string) => applications.filter((a) => a.jobId === jobId),
-    getByCandidateId: (candidateId: string) => applications.filter((a) => a.candidateId === candidateId),
+    getByJobId: (jobId: string) =>
+      applications.filter((a) => a.jobId === jobId),
+    getByCandidateId: (candidateId: string) =>
+      applications.filter((a) => a.candidateId === candidateId),
     create: (appData: Omit<Application, "id" | "appliedAt">) => {
       const newApplication: Application = {
         ...appData,
         id: Date.now().toString(),
         appliedAt: new Date().toISOString(),
-      }
-      applications.push(newApplication)
+      };
+      applications.push(newApplication);
 
       // Update job applicant count
-      const jobIndex = jobs.findIndex((j) => j.id === appData.jobId)
+      const jobIndex = jobs.findIndex((j) => j.id === appData.jobId);
       if (jobIndex !== -1) {
-        jobs[jobIndex].applicants += 1
+        jobs[jobIndex].applicants += 1;
       }
 
-      return newApplication
+      return newApplication;
     },
     update: (id: string, updates: Partial<Application>) => {
-      const index = applications.findIndex((a) => a.id === id)
-      if (index === -1) return null
-      applications[index] = { ...applications[index], ...updates }
-      return applications[index]
+      const index = applications.findIndex((a) => a.id === id);
+      if (index === -1) return null;
+      applications[index] = { ...applications[index], ...updates };
+      return applications[index];
     },
     delete: (id: string) => {
-      const index = applications.findIndex((a) => a.id === id)
-      if (index === -1) return false
-      applications.splice(index, 1)
-      return true
+      const index = applications.findIndex((a) => a.id === id);
+      if (index === -1) return false;
+      applications.splice(index, 1);
+      return true;
     },
   },
   assessments: {
@@ -280,21 +291,21 @@ export const dataStore = {
         ...assessmentData,
         id: Date.now().toString(),
         createdAt: new Date().toISOString(),
-      }
-      assessments.push(newAssessment)
-      return newAssessment
+      };
+      assessments.push(newAssessment);
+      return newAssessment;
     },
     update: (id: string, updates: Partial<Assessment>) => {
-      const index = assessments.findIndex((a) => a.id === id)
-      if (index === -1) return null
-      assessments[index] = { ...assessments[index], ...updates }
-      return assessments[index]
+      const index = assessments.findIndex((a) => a.id === id);
+      if (index === -1) return null;
+      assessments[index] = { ...assessments[index], ...updates };
+      return assessments[index];
     },
     delete: (id: string) => {
-      const index = assessments.findIndex((a) => a.id === id)
-      if (index === -1) return false
-      assessments.splice(index, 1)
-      return true
+      const index = assessments.findIndex((a) => a.id === id);
+      if (index === -1) return false;
+      assessments.splice(index, 1);
+      return true;
     },
   },
-}
+};
